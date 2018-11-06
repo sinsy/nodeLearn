@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        div{
+            width: 200px;
+            height: 200px;
+            border: 2px solid red;
+            overflow: hidden;
+        }
+        div p{
+            width: 200px;
+            height: 200px;color: red;
+        }
+    </style>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+<div>
+    <p id="one">1</p>
+    <p id="one1">2</p>
+    <p id="one2">3</p>
+</div>
+<a href="#one">1</a><a href="#one1">2</a><a href="one2">3</a>
+<script>
+  load= function (url, cfg, success) {
+    let doc = document;
+    var op = Object.prototype.toString;
+    var head = doc.getElementsByTagName('head')[0] || doc.head || doc.documentElement;
+    if (op.call(cfg) === '[object Function]') {
+      success = cfg;
+      cfg = {};
+    }
+    var type = cfg.type || 'script',
+      jsonpCallback = cfg.jsonpCallback || 'fn';
+    jsonp = type == 'jsonp' ? (cfg.callbackName || 'callback') : '', data = cfg.data || '', dataToParam = function (data) {
+      var ret = [],
+        key, e = encodeURIComponent;
+      for (key in data) {
+        ret.push(key + '=' + e(data[key]))
+      }
+      return ret.join('&');
+    }; //url = url + (/\?/.test(url) ? '&' : (jsonp || data) ? '?' : '') + (jsonp ? (jsonp + '=' + jsonpCallback) : '') + (data ? '&' + dataToParam(data) : '');
+    loadScript = function (url, callback) {
+      var script = doc.createElement("script");
+      script.type = "text/javascript";
+      script.charset = "utf-8";
+      if (script.readyState) { //IE
+        script.onreadystatechange = function () {
+
+          if (/loaded|complete/i.test(script.readyState)) {
+            script.onreadystatechange = null;
+            callback && callback.call(this);
+          }
+        };
+      } else { //Others
+        script.onload = function () {
+          console.log(this)
+          callback && callback.call(this);
+        };
+      }
+      script.src = url;
+      head.insertBefore(script, head.firstChild);
+    }, removeScript = function () {
+      var arg = arguments,
+        script = arg[0],
+        jsonpCallback = arg[1],
+        type = Object.prototype.toString;
+      //移除脚本
+      if (script && /script/i.test(script.tagName)) {
+        script.parentNode.removeChild(script);
+      }
+      //移除回调
+      if (jsonpCallback && type.call(jsonpCallback) === '[object String]') {
+        window[jsonpCallback] = null;
+      }
+      success();
+    };
+    var callback = window[jsonpCallback] = success;
+    loadScript(url, function () {
+      removeScript(this, jsonpCallback);
+    });
+  }
+
+  load('http://erp.taige.net/custom-bms/business/getBusinessList',{type:'script', data:{}},function(res){
+    console.log(res)
+  });
+</script>
+</body>
+<html>
